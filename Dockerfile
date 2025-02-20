@@ -81,6 +81,7 @@ RUN yarn test
 # It pulls the package.json and yarn.lock from the test stage to ensure that
 # the tests run (without this, the test stage would simply be skipped).
 ###################################################
+# test the pipeline
 FROM base AS final
 ENV NODE_ENV=production
 COPY --from=test /usr/local/app/package.json /usr/local/app/yarn.lock ./

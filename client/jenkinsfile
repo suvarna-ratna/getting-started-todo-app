@@ -1,0 +1,45 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "suvarnaratna/my todoapp"
+        CONTAINER_NAME = "todo-container"
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git 'https://github.com/suvarna-ratna/getting-started-todo-app.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t $IMAGE_NAME .'
+                }
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    sh 'docker stop $CONTAINER_NAME || true'
+                    sh 'docker rm $CONTAINER_NAME || true'
+                    sh 'docker run -d -p 3000:3000 --name $CONTAINER_NAME $IMAGE_NAME'
+                }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                script {
+                    withDockerRegistry([credentialsId: 'docker-hub-credentials', url: '']) {
+                        sh 'docker tag $IMAGE_NAME $IMAGE_NAME:latest'
+                        sh 'docker push $IMAGE_NAME:latest'
+                    }
+                }
+            }
+        }
+    }
+}
